@@ -1,6 +1,6 @@
 # Vuedle
 
-A real-time HTML5 canvas drawing page built with Vue.js
+An online/shared HTML5 canvas drawing page built with Vue.js
 
 ## Live Demo
 
