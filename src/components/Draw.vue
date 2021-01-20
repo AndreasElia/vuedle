@@ -4,6 +4,9 @@
     @mousedown="onMouseDown"
     @mousemove="onMouseMove"
     @mouseup="onMouseUp"
+    @touchstart="onTouchStart"
+    @touchmove="onTouchMove"
+    @touchend="onTouchEnd"
     ref="canvas"
   />
 </template>
@@ -22,6 +25,7 @@ export default {
     let canvas = ref(null)
     let ctx = ref(null)
     let isMouseDown = ref(false)
+    let isTouchDown = ref(false)
     let startPoints = ref({})
     let movingPoints = ref([])
 
@@ -53,6 +57,8 @@ export default {
     }
 
     function onMouseMove(e) {
+      e.preventDefault()
+
       if (!isMouseDown.value) {
         return
       }
@@ -67,6 +73,46 @@ export default {
 
     function onMouseUp(e) {
       isMouseDown.value = false
+
+      socket.emit('draw', {
+        start: startPoints.value,
+        moving: movingPoints.value,
+      })
+
+      startPoints.value = {}
+      movingPoints.value = []
+    }
+
+    function onTouchStart(e) {
+      isTouchDown.value = true
+
+      const touch = e.touches[0]
+
+      startPoints.value = {
+        x: touch.clientX,
+        y: touch.clientY
+      }
+    }
+
+    function onTouchMove(e) {
+      e.preventDefault()
+
+      if (!isTouchDown.value) {
+        return
+      }
+
+      const touch = e.touches[0]
+
+      movingPoints.value.push({
+        x: touch.clientX,
+        y: touch.clientY
+      })
+
+      draw(movingPoints.value)
+    }
+
+    function onTouchEnd(e) {
+      isTouchDown.value = false
 
       socket.emit('draw', {
         start: startPoints.value,
@@ -123,6 +169,9 @@ export default {
       onMouseDown,
       onMouseMove,
       onMouseUp,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
       draw,
       init
     }
